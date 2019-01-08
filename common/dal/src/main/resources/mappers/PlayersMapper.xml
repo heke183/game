@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xianglin.game.common.dal.mapper.PlayersMapper">
+
+    <update id="updateOfLogin" parameterType="com.xianglin.game.common.dal.model.PlayerDO">
+        UPDATE game_landlord_players
+        SET UUID = #{uuid}, SHOW_NAME = #{showName},
+            HEAD_IMG = #{headImg}, UPDATE_DATE = now(), LAST_LOGIN_DATE = now()
+        WHERE PARTY_ID = #{partyId}
+    </update>
+
+    <update id="updateCredit" parameterType="com.xianglin.game.common.dal.model.PlayerDO">
+        UPDATE game_landlord_players
+        SET CREDIT =  IFNULL(CREDIT,0) + #{credit},
+            CREDIT_LEVEL = #{creditLevel},
+            GAME_CURRENCY = IFNULL(GAME_CURRENCY,0) + #{gameCurrency},
+            TOTAL_GAMES = IFNULL(TOTAL_GAMES,0) + 1,
+            WIN_GAMES = IFNULL(WIN_GAMES,0) + #{winGames},
+            FAIL_GAMES = IFNULL(FAIL_GAMES,0) + #{failGames},
+            RUM_AWAY = IFNULL(RUM_AWAY,0) + #{rumAway},
+            UPDATE_DATE = now()
+        WHERE PARTY_ID = #{partyId}
+    </update>
+
+    <update id="updateGameCurrency" parameterType="com.xianglin.game.common.dal.model.PlayerDO">
+        UPDATE game_landlord_players
+        SET GAME_CURRENCY = IFNULL(GAME_CURRENCY,0) + #{gameCurrency},
+            UPDATE_DATE = now()
+        WHERE PARTY_ID = #{partyId}
+    </update>
+
+    <update id="dailyAddGameCurrency" parameterType="long">
+        UPDATE game_landlord_players a
+        SET GAME_CURRENCY = IFNULL(GAME_CURRENCY,0) + 2000
+        WHERE a.PARTY_ID = #{value} AND a.IS_DELETED = '0' AND a.PARTY_ID NOT IN (
+          SELECT PARTY_ID
+          FROM game_landlord_order
+          WHERE IS_DELETED = '0' AND DATE(END_DATE) = curdate() AND GOODS_ID = '5fafe4d1-02c1-11e9-8344-005056b84175')
+    </update>
+
+    <select id="selectByUUID" parameterType="string" resultType="com.xianglin.game.common.dal.model.PlayerDO">
+        SELECT
+          p.ROOM_UUID roomUuid,
+          p.PARTY_ID partyId,
+          p.SHOW_NAME showName,
+          p.HEAD_IMG headImg,
+          p.CREDIT credit,
+          p.GAME_CURRENCY gameCurrency,
+          p.CREDIT_LEVEL creditLevel,
+          p.TOTAL_GAMES totalGames,
+          p.WIN_GAMES winGames,
+          p.FAIL_GAMES failGames,
+          p.RUM_AWAY rumAway
+        FROM game_landlord_players p WHERE UUID = #{value} AND IS_DELETED = '0';
+    </select>
+
+    <select id="selectByPartyId" parameterType="long" resultType="com.xianglin.game.common.dal.model.PlayerDO">
+        SELECT
+          p.ROOM_UUID roomUuid,
+          p.PARTY_ID partyId,
+          p.SHOW_NAME showName,
+          p.GAME_CURRENCY gameCurrency,
+          p.LAST_ROOM_ADDRESS lastRoomAddress,
+          p.ROOM_UUID roomUuid,
+          p.HEAD_IMG headImg,
+          p.CREDIT credit,
+          p.CREDIT_LEVEL creditLevel,
+          p.TOTAL_GAMES totalGames,
+          p.WIN_GAMES winGames,
+          p.FAIL_GAMES failGames,
+          p.RUM_AWAY rumAway
+        FROM game_landlord_players p WHERE PARTY_ID = #{value} AND IS_DELETED = '0';
+    </select>
+
+    <update id="updateOfJoinRoom">
+        UPDATE game_landlord_players
+        SET ROOM_UUID = #{roomUuid}, LAST_ROOM_ADDRESS = #{lastRoomAddress}
+        WHERE
+        PARTY_ID = #{partyId} AND IS_DELETED = '0'
+        <if test="!reconnected">
+            AND ROOM_UUID IS NULL
+        </if>
+    </update>
+
+    <update id="updateOfExitRoom" >
+        UPDATE game_landlord_players
+        SET ROOM_UUID = NULL
+        WHERE PARTY_ID = #{partyId} AND ROOM_UUID = #{roomUuid}
+    </update>
+
+    <update id="clearAllRoomUUID">
+        UPDATE game_landlord_players p SET p.ROOM_UUID = NULL
+    </update>
+
+</mapper>
+

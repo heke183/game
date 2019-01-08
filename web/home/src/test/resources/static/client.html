@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+
+<body>
+<div id="content" class="row-center">
+    <div id="chat-box" class="row-center">
+
+    </div>
+    <div id="input-box">
+        <input class="chat-input" id="chat-input" placeholder="message"></input>
+        <input id="myid" placeholder="myid">
+        <button id="login-button">登录</button> <br/>
+        <input id="friendid" placeholder="friendid">
+        <button class="chat-button" id="send">发送</button> <br/>
+
+        <button id="close-button">关闭</button>
+    </div>
+</div>
+</body>
+<script type="text/javascript" src="jquery-1.10.2.min.js"></script>
+
+<script type="text/javascript">
+    var ipaddress = "127.0.0.1";
+    //新建socket对象
+    window.socket = new WebSocket("ws://172.16.12.124:8111/ws/?EIO=3&transport=websocket");
+    //监听netty服务器消息并打印到页面上
+    socket.onmessage = function (event) {
+        console.log(event);
+        var datas = event.data.split(",");
+        console.log("服务器消息====" + datas);
+        $("#chat-box").text(datas);
+    }
+    $(function () {
+        //将发送人接收人的id和要发生的消息发送出去
+        $("#login-button").click(function () {
+            console.log("login")
+            var data = $("#myid").val();
+            socket.send(data);
+        });
+
+        $("#send").click(function () {
+            console.log($("#chat-input").val())
+            var data = $("#myid").val() + "," + $("#friendid").val() + "," + $("#chat-input").val()
+            socket.send(data)
+        });
+
+        $("#close-button").click(function () {
+            console.log("close socket");
+        });
+    });
+
+
+</script>
+
+</html>

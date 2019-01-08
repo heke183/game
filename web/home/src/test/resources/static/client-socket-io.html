@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+
+<body>
+<div id="content" class="row-center">
+    <div id="chat-box" class="row-center">
+
+    </div>
+    <div id="input-box">
+
+        <br/>
+        <button class="chat-button" id="getUserInfo">获取用户信息</button>
+        <br/>
+
+        <button class="chat-button" id="login">登录</button>
+        <br/>
+
+        <button class="chat-button" id="createRoom">创建房间</button>
+        <br/>
+
+        <button class="chat-button" id="roomList">房间列表</button>
+        <br/>
+
+        id: <input type="text" id="joinRoomId"/>
+        位置: <input type="text" id="joinRoomPosition"/>
+        <button class="chat-button" id="joinRoom">加入房间</button>
+        <br/>
+
+        <button class="chat-button" id="userRoomReady">准备</button>
+
+
+        <button class="chat-button" id="joinRoomConnect">准备</button>
+
+
+<img src="https://appfile.xianglin.cn/file/187688" />
+    </div>
+</div>
+</body>
+
+<script src="./socket.io.js"></script>
+<script src="jquery-1.10.2.min.js"></script>
+
+<script type="text/javascript">
+
+    //创建socket
+
+    var socket = io('http://127.0.0.1:8111/hall');
+
+    socket.on('connect', function (data) {
+        console.log("连接大厅成功。");
+        var socketRoom = io('http://127.0.0.1:8111/room');
+        socketRoom.on('connect', function (data) {
+            console.log("连接房间成功。");
+            socketRoom.emit('getUserInfo', {'partyId': 5199881});
+        })
+    })
+
+    /*
+      创建自定义事件 'news'
+      作用：接受服务端 socket.emit('news', 数据); 发出的数据
+    */
+    socket.on('login', function (data) {
+        console.log(JSON.stringify(data, null, '\t'));
+    });
+
+    $("#login").click(function () {
+        console.log("send " + $("#friendid").val())
+        //向服务端的自定义事件 'my other event' 发出数据
+        socket.emit('login', {'partyId': 5199881});
+    });
+
+    socket.on('getUserInfo', function (data) {
+        console.log("data：" + JSON.stringify(data, null, '\t'));
+    });
+    $("#getUserInfo").click(function () {
+        //向服务端的自定义事件 'my other event' 发出数据
+        socket.emit('getUserInfo', {'partyId': 5199881});
+    });
+
+    socket.on('createRoom', function (data) {
+        console.log("data：" + JSON.stringify(data, null, '\t'));
+    });
+    $("#createRoom").click(function () {
+        //向服务端的自定义事件 'my other event' 发出数据
+        socket.emit('createRoom', {'partyId': 5199881});
+    });
+
+    socket.on('getRoomList', function (data) {
+        console.log("data：" + JSON.stringify(data, null, '\t'));
+    });
+    $("#roomList").click(function () {
+        //向服务端的自定义事件 'my other event' 发出数据
+        socket.emit('getRoomList');
+    });
+
+    socket.on('joinRoom', function (data) {
+        console.log("data：" + JSON.stringify(data, null, '\t'));
+    });
+    $("#joinRoom").click(function () {
+
+        console.log("id" + $("#joinRoomId").val());
+        console.log("位置" + $("#joinRoomPosition").val());
+
+        //向服务端的自定义事件 'my other event' 发出数据
+        socket.emit('joinRoom', {'room': $("#joinRoomId").val(), 'position': $("#joinRoomPosition").val()});
+    });
+
+    socket.on('userRoomReady', function (data) {
+        console.log("data：" + JSON.stringify(data, null, '\t'));
+    });
+    $("#userRoomReady").click(function () {
+        socket.emit('userRoomReady');
+    });
+
+    socket.on('getRoomUser', function (data) {
+        console.log("其他玩家准备后受到通知，data：" + JSON.stringify(data, null, '\t'));
+    })
+
+    socket.on('showCards', function (data) {
+        console.log("玩家都准备后收到牌，data：" + JSON.stringify(data, null, '\t'));
+    })
+
+    socket.on('roomChangeStatus', function (data) {
+        console.log("开始游戏后，房间状态改变，data：" + JSON.stringify(data, null, '\t'))
+    })
+
+    $("#joinRoomConnect").click(function () {
+        //向服务端的自定义事件 'my other event' 发出数据
+        socket.emit('joinRoomConnect');
+    });
+
+</script>
+
+</html>

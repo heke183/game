@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xianglin.game.common.dal.mapper.RoomMapper">
+
+    <select id="isJoined" parameterType="string" resultType="boolean">
+        SELECT sign(count(*)) FROM game_landlord_room
+        WHERE LEFT_POS = #{value} OR RIGHT_POS = #{value} OR DOWN_POS = #{value}
+    </select>
+
+    <update id="join">
+        UPDATE game_landlord_room
+        SET ${position} = #{uuid}
+        WHERE ROOM = #{room}
+        <if test="!reconnected">
+          AND ${position} IS NULL
+        </if>
+    </update>
+
+    <update id="exit">
+        UPDATE game_landlord_room
+        SET ${position} = null
+        WHERE ROOM = #{room}
+    </update>
+
+    <select id="selectRooms" resultType="com.xianglin.game.common.dal.model.RoomDO">
+        SELECT
+          ROOM room,
+          LEFT_POS leftPos,
+          DOWN_POS downPos,
+          RIGHT_POS rightPos
+        FROM game_landlord_room r
+    </select>
+
+    <select id="selectSuitableRoom" resultType="com.xianglin.game.common.dal.model.RoomDO">
+        SELECT
+          t.ROOM room,
+          t.LEFT_POS leftPos,
+          t.DOWN_POS downPos,
+          t.RIGHT_POS rightPos
+        FROM (
+               SELECT
+                 t.*,
+                 CASE WHEN t.LEFT_POS IS NULL
+                   THEN 1
+                 ELSE 0
+                 END + CASE WHEN t.DOWN_POS IS NULL
+                   THEN 1
+                       ELSE 0 END + CASE WHEN t.RIGHT_POS IS NULL
+                   THEN 1
+                                    ELSE 0 END AS calc
+               FROM game_landlord_room t) t
+        WHERE t.calc != 0
+        ORDER BY calc, ROOM
+        LIMIT 1
+    </select>
+
+    <update id="clearAllRoom">
+        UPDATE game_landlord_room SET LEFT_POS = NULL, RIGHT_POS = NULL, DOWN_POS = NULL
+    </update>
+
+</mapper>
+

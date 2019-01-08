@@ -1,0 +1,38 @@
+spring:
+  application:
+    name: game
+  profiles:
+    active: test
+  redis:
+    database: 8
+    cache: redis-cache.test.xianglin.com
+    port: 6379
+    session: redis-session.test.xianglin.com
+  dubbo:
+    application:
+      name: consumer
+    registry:
+      check: false
+      address: zookeeper://zookeeper181.test.xianglin.com:2181?backup=zookeeper182.test.xianglin.com:2181,zookeeper183.test.xianglin.com:2181
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://mysql.test.xianglin.com:3306/xlgamedb?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true
+    username: xlgameuser
+    password: ure21UgL
+
+logging:
+  config: classpath:logback-spring.xml
+  path: /data/logs/game
+  level:
+    root: info
+    com.xianglin: debug
+
+landlord:
+  room:
+    server:
+      address:
+      - https://game1-test.xianglin.cn/room
+      - https://game2-test.xianglin.cn/room
+
+mybatis:
+  mapper-locations: classpath:/mappers/**/*.xml

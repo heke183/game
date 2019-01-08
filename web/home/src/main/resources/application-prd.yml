@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: game
+  profiles:
+    active: prd
+  redis:
+    database: 8
+    cache: redis-cache.xianglin.localdomain
+    port: 6379
+    session: redis-session.xianglin.localdomain
+  dubbo:
+    application:
+      name: consumer
+    registry:
+      address: zookeeper://zookeeper1.xianglin.localdomain:2181?backup=zookeeper2.xianglin.localdomain:2181,zookeeper3.xianglin.localdomain:2181
+
+logging:
+  config: classpath:logback-spring.xml
+  path: /data/logs/game
+  level:
+    root: info
+    com.xianglin: info

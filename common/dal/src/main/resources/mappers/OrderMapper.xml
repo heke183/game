@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xianglin.game.common.dal.mapper.OrderMapper">
+
+    <insert id="insertDailyAddGameCurrencyOrder" parameterType="long">
+        INSERT INTO game_landlord_order(PARTY_ID, ORDER_ID, ORDER_DATE, END_DATE, GOODS_ID, GOODS_VALUE, CREATOR, UPDATER, CREATE_DATE, UPDATE_DATE)
+        VALUES (#{value}, uuid(), now(), now(), '5fafe4d1-02c1-11e9-8344-005056b84175', 2000, 'system', 'system', now(), now());
+    </insert>
+
+</mapper>
+

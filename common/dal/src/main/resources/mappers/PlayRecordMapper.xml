@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xianglin.game.common.dal.mapper.PlayRecordMapper">
+
+    <select id="weekRankingSelf" parameterType="long" resultType="com.xianglin.game.common.dal.model.PlayerDO">
+          SELECT
+              p.PARTY_ID partyId,
+              p.SHOW_NAME showName,
+              p.HEAD_IMG headImg,
+              IFNULL(t.credit,0) credit,
+              p.CREDIT_LEVEL creditLevel,
+              p.TOTAL_GAMES totalGames,
+              p.WIN_GAMES winGames,
+              p.FAIL_GAMES failGames,
+              p.RUM_AWAY rumAway,
+              IFNULL(t.ranking, -1) ranking
+            FROM game_landlord_players p
+              LEFT JOIN (
+              SELECT
+                  t.*,
+                  @x := @x + 1 ranking
+                FROM (
+                       SELECT
+
+                         sum(t.CREDIT) credit,
+                         t.PARTY_ID
+
+                       FROM game_landlord_play_record t
+                       GROUP BY PARTY_ID
+                       ORDER BY sum(t.CREDIT) DESC, max(t.RECORD_DATE)) t, (SELECT @x := 0) x
+              ) t ON p.PARTY_ID = t.PARTY_ID
+          WHERE p.PARTY_ID = #{value}
+    </select>
+
+    <select id="totalRankingSelf" parameterType="long" resultType="com.xianglin.game.common.dal.model.PlayerDO">
+          SELECT
+              p.PARTY_ID partyId,
+              p.SHOW_NAME showName,
+              p.HEAD_IMG headImg,
+              IFNULL(t.credit,0) credit,
+              p.CREDIT_LEVEL creditLevel,
+              p.TOTAL_GAMES totalGames,
+              p.WIN_GAMES winGames,
+              p.FAIL_GAMES failGames,
+              p.RUM_AWAY rumAway,
+              IFNULL(t.ranking, -1) ranking
+            FROM game_landlord_players p
+              LEFT JOIN (SELECT
+                  t.*,
+                  @x := @x + 1 ranking
+                FROM (
+                       SELECT
+
+                         sum(t.CREDIT) credit,
+                         t.PARTY_ID
+
+                       FROM game_landlord_play_record t
+                       GROUP BY PARTY_ID
+                       ORDER BY sum(t.CREDIT) DESC, max(t.RECORD_DATE)) t, (SELECT @x := 0) x
+                           ) t ON p.PARTY_ID = t.PARTY_ID
+            WHERE p.PARTY_ID = #{value}
+
+    </select>
+
+    <select id="weekRanking" parameterType="long" resultType="com.xianglin.game.common.dal.model.PlayerDO">
+
+        SELECT
+          p.PARTY_ID partyId,
+          p.SHOW_NAME showName,
+          p.HEAD_IMG headImg,
+          t.credit,
+          p.CREDIT_LEVEL creditLevel,
+          p.TOTAL_GAMES totalGames,
+          p.WIN_GAMES winGames,
+          p.FAIL_GAMES failGames,
+          p.RUM_AWAY rumAway,
+          t.ranking,
+          t.PARTY_ID = ${value} self
+        FROM game_landlord_players p
+          INNER JOIN (SELECT
+                  t.*,
+                  @x := @x + 1 ranking
+                FROM (
+                       SELECT
+
+                         sum(t.CREDIT) credit,
+                         t.PARTY_ID
+
+                       FROM game_landlord_play_record t
+                       WHERE YEARWEEK(date_format(t.RECORD_DATE,'%Y-%m-%d')) = YEARWEEK(now())
+                       GROUP BY PARTY_ID
+                       ORDER BY sum(t.CREDIT) DESC, max(t.RECORD_DATE) LIMIT 30) t, (SELECT @x := 0) x) t ON p.PARTY_ID = t.PARTY_ID
+                     ORDER BY t.ranking
+    </select>
+
+    <select id="totalRanking" parameterType="long" resultType="com.xianglin.game.common.dal.model.PlayerDO">
+
+        SELECT
+          p.PARTY_ID partyId,
+          p.SHOW_NAME showName,
+          p.HEAD_IMG headImg,
+          t.credit,
+          p.CREDIT_LEVEL creditLevel,
+          p.TOTAL_GAMES totalGames,
+          p.WIN_GAMES winGames,
+          p.FAIL_GAMES failGames,
+          p.RUM_AWAY rumAway,
+          t.ranking,
+          t.PARTY_ID = ${value} self
+        FROM game_landlord_players p
+          INNER JOIN (SELECT
+                  t.*,
+                  @x := @x + 1 ranking
+                FROM (
+                       SELECT
+
+                         sum(t.CREDIT) credit,
+                         t.PARTY_ID
+
+                       FROM game_landlord_play_record t
+                       GROUP BY PARTY_ID
+                       ORDER BY sum(t.CREDIT) DESC, max(t.RECORD_DATE) LIMIT 50) t, (SELECT @x := 0) x) t ON p.PARTY_ID = t.PARTY_ID
+                     ORDER BY t.ranking
+    </select>
+
+
+    <insert id="insertRecord" parameterType="com.xianglin.game.common.dal.model.PlayRecord">
+        INSERT game_landlord_play_record
+          (PARTY_ID, BASE_SCORE, MULTIPLE, CREDIT, GAME_CURRENCY, IS_LANDLORD, RESULT, RECORD_DATE, CREATOR, UPDATER, CREATE_DATE, UPDATE_DATE)
+        VALUES (#{partyId}, #{baseScore}, #{multiple}, #{credit}, #{gameCurrency}, #{isLandlord},
+            #{result}, now(),
+            #{creator}, #{creator}, now(), now())
+    </insert>
+
+</mapper>
+
